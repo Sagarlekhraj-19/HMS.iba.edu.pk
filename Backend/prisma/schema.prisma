@@ -1,0 +1,363 @@
+// server/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────
+// USER — shared for student & admin
+// ─────────────────────────────────────────
+model User {
+  id        Int      @id @default(autoincrement())
+  fullName  String
+  erp       String?  @unique
+  email     String   @unique
+  password  String
+  program   String?
+  isNTHP    Boolean  @default(false)
+  isActive  Boolean  @default(true)
+  role      Role     @default(STUDENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  student   Student?
+  admin     Admin?
+  reviewedMessRequests MessRequest[]      @relation("MessRequestReviewer")
+  updatedMessMenus     MessMenuItem[]     @relation("MessMenuEditor")
+  createdMessBills     MessBill[]         @relation("MessBillCreator")
+  messAnnouncements    MessAnnouncement[] @relation("MessAnnouncementCreator")
+  complaintUpdates     ComplaintUpdate[]  @relation("ComplaintUpdatedBy")
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+  MESS_MANAGER
+  COMPLAINT_MANAGER
+  CLEANING_MANAGER
+}
+
+// ─────────────────────────────────────────
+// STUDENT — profile linked to a User
+// ─────────────────────────────────────────
+model Student {
+  id         Int     @id @default(autoincrement())
+  userId     Int     @unique
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  batch      String? // e.g. "2023-27"
+  semester   String? // e.g. "Spring 2026"
+  balance    Float   @default(0)
+  dietaryPreference String?
+
+  // Relations
+  roomApplications RoomApplication[]
+  messOrders       MessOrder[]
+  messRequests     MessRequest[]
+  messMemberships  MessMembership[]
+  messBills        MessBill[]
+  complaints       Complaint[]
+  feedbacks        Feedback[]
+}
+
+// ─────────────────────────────────────────
+// ADMIN — warden profile linked to a User
+// ─────────────────────────────────────────
+model Admin {
+  id     Int    @id @default(autoincrement())
+  userId Int    @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  block  String? // which block they manage
+
+  roomApplications RoomApplication[] // admin who reviewed
+}
+
+// ─────────────────────────────────────────
+// ROOM — hostel rooms
+// ─────────────────────────────────────────
+model Room {
+  id          Int          @id @default(autoincrement())
+  roomNumber  String       @unique // e.g. "B-204"
+  block       String       // "Block A", "Block B"
+  floor       Int
+  type        RoomType     @default(DOUBLE)
+  capacity    Int          @default(2)
+  isAvailable Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+
+  applications RoomApplication[]
+}
+
+enum RoomType {
+  SINGLE
+  DOUBLE
+}
+
+// ─────────────────────────────────────────
+// ROOM APPLICATION — student applies for a room
+// ─────────────────────────────────────────
+model RoomApplication {
+  id               Int               @id @default(autoincrement())
+  appId            String            @unique @default(cuid()) // #APP-XXXX
+  studentId        Int
+  student          Student           @relation(fields: [studentId], references: [id])
+  roomId           Int?
+  room             Room?             @relation(fields: [roomId], references: [id])
+  reviewedBy       Int?              // Admin id
+  admin            Admin?            @relation(fields: [reviewedBy], references: [id])
+  term             String            // "Spring 2026"
+  remarks          String?
+  status           ApplicationStatus @default(PENDING)
+  isAdminReviewed  Boolean           @default(false) // tracks if admin has viewed this
+  reviewedAt       DateTime?         // when admin first reviewed
+  submittedAt      DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+}
+
+enum ApplicationStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  ALLOCATED
+  REJECTED
+}
+
+// ─────────────────────────────────────────
+// MESS ORDER — student subscribes to meals
+// ─────────────────────────────────────────
+model MessOrder {
+  id         Int         @id @default(autoincrement())
+  orderId    String      @unique @default(cuid()) // #ORD-XXXX
+  studentId  Int
+  student    Student     @relation(fields: [studentId], references: [id])
+  mealTypes  String[]    // ["Breakfast", "Dinner"] or ["Sehri", "Dinner"]
+  startDate  DateTime
+  endDate    DateTime
+  totalAmount Float
+  status     OrderStatus @default(ACTIVE)
+  isPaid     Boolean     @default(false)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+model MessRequest {
+  id             Int                 @id @default(autoincrement())
+  requestId      String              @unique @default(cuid())
+  studentId      Int
+  student        Student             @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  type           MessRequestType
+  pauseStartDate DateTime?
+  pauseEndDate   DateTime?
+  dietaryPreference String?
+  note           String?
+  status         MessRequestStatus   @default(PENDING)
+  reviewedByUserId Int?
+  reviewedBy     User?               @relation("MessRequestReviewer", fields: [reviewedByUserId], references: [id])
+  reviewedAt     DateTime?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+}
+
+model MessMembership {
+  id              Int                    @id @default(autoincrement())
+  studentId       Int
+  student         Student                @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  status          MessMembershipStatus   @default(ACTIVE)
+  roomNumber      String?
+  dietaryPreference String?
+  startDate       DateTime               @default(now())
+  endDate         DateTime?
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+
+  @@index([studentId, status])
+}
+
+model MessMenuItem {
+  id          Int          @id @default(autoincrement())
+  date        DateTime
+  mealType    MenuMealType
+  itemName    String
+  isHoliday   Boolean      @default(false)
+  notes       String?
+  updatedByUserId Int?
+  updatedBy   User?        @relation("MessMenuEditor", fields: [updatedByUserId], references: [id])
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([date, mealType])
+}
+
+model MessBill {
+  id              Int             @id @default(autoincrement())
+  billId          String          @unique @default(cuid())
+  studentId       Int
+  student         Student         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  month           Int
+  year            Int
+  fixedCharge     Float           @default(0)
+  perMealCharge   Float           @default(0)
+  fine            Float           @default(0)
+  extraCharge     Float           @default(0)
+  totalAmount     Float
+  paidAmount      Float           @default(0)
+  paymentStatus   MessPaymentStatus @default(UNPAID)
+  dueDate         DateTime?
+  createdByUserId Int?
+  createdBy       User?           @relation("MessBillCreator", fields: [createdByUserId], references: [id])
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@unique([studentId, month, year])
+}
+
+model MessAnnouncement {
+  id              Int                 @id @default(autoincrement())
+  title           String
+  message         String
+  type            MessAnnouncementType
+  isPinned        Boolean             @default(false)
+  createdByUserId Int?
+  createdBy       User?               @relation("MessAnnouncementCreator", fields: [createdByUserId], references: [id])
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+}
+
+enum OrderStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum MessRequestType {
+  JOIN
+  CANCEL
+  PAUSE
+}
+
+enum MessRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum MessMembershipStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum MenuMealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+}
+
+enum MessPaymentStatus {
+  PAID
+  PARTIAL
+  UNPAID
+}
+
+enum MessAnnouncementType {
+  MENU_CHANGE
+  HOLIDAY
+  DUES
+  EMERGENCY
+  GENERAL
+}
+
+// ─────────────────────────────────────────
+// COMPLAINT — student raises a complaint
+// ─────────────────────────────────────────
+model Complaint {
+  id           Int              @id @default(autoincrement())
+  complaintId  String           @unique @default(cuid()) // #CMP-XXXX
+  studentId    Int
+  student      Student          @relation(fields: [studentId], references: [id])
+  category     ComplaintCategory
+  subject      String?
+  description  String
+  roomNumber   String
+  floor        String?
+  block        String?
+  isAnonymous  Boolean          @default(false)
+  attachment   String?          // file path or URL
+  assignedRole ComplaintAssignedRole?
+  assignedStaff String?
+  status       ComplaintStatus  @default(PENDING)
+  submittedAt  DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  updates      ComplaintUpdate[]
+}
+
+model ComplaintUpdate {
+  id             Int                   @id @default(autoincrement())
+  complaintId    Int
+  complaint      Complaint             @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  status         ComplaintStatus?
+  remarks        String?
+  assignedRole   ComplaintAssignedRole?
+  assignedStaff  String?
+  updatedByUserId Int?
+  updatedBy      User?                 @relation("ComplaintUpdatedBy", fields: [updatedByUserId], references: [id])
+  createdAt      DateTime              @default(now())
+
+  @@index([complaintId, createdAt])
+}
+
+enum ComplaintCategory {
+  ELECTRICAL_FAN_AC
+  ELECTRICAL_LIGHTS
+  PLUMBING_LEAKAGE
+  MESS_FOOD_QUALITY
+  MESS_LATE_MEALS
+  MESS_KITCHEN_HYGIENE
+  FURNITURE_BED_MATTRESS
+  FURNITURE_DAMAGE
+  MAINTENANCE
+  PLUMBING
+  ELECTRICAL
+  MESS_FOOD
+  WATER_SHORTAGE
+  INTERNET_WIFI
+  LAUNDRY_ISSUES
+  SECURITY
+  CLEANING
+  OTHER
+}
+
+enum ComplaintStatus {
+  OPEN
+  PENDING
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+  REOPENED
+  REJECTED
+}
+
+enum ComplaintAssignedRole {
+  CLEANER
+  ELECTRICIAN
+  PLUMBER
+  MESS_MANAGER
+  SECURITY
+}
+
+// ─────────────────────────────────────────
+// FEEDBACK — student submits service feedback
+// ─────────────────────────────────────────
+model Feedback {
+  id           Int      @id @default(autoincrement())
+  studentId    Int
+  student      Student  @relation(fields: [studentId], references: [id])
+  feedbackType String   // "Hostel", "Mess", "Warden"
+  comment      String
+  rating       Int      // 1–5
+  submittedAt  DateTime @default(now())
+}
