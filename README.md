@@ -327,4 +327,12 @@ docs: update README                # documentation
   
   
   # Figma wireframes:
+
+  #Students role:
   https://www.figma.com/design/vhQavxqOXw0dNVJUJAAiCI/Untitled?node-id=0-1&t=eEUc7TVduyAgbTkO-1
+
+  #Admin role:
+  https://www.figma.com/design/4XqZI4wNrQZU3oIyx3OvVx/Admin_role?node-id=0-1&t=HM1tZSdNug4oAo3K-1
+
+
+  
