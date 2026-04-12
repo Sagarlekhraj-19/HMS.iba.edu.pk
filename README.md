@@ -335,4 +335,7 @@ docs: update README                # documentation
   https://www.figma.com/design/4XqZI4wNrQZU3oIyx3OvVx/Admin_role?node-id=0-1&t=HM1tZSdNug4oAo3K-1
 
 
+
+  #All in one zip file:
+  https://drive.google.com/drive/folders/1FhwVcqFB-Kmmh7jWMeu4qnZyOYbuEcRu?usp=sharing
   
