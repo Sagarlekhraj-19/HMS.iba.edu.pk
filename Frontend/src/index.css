@@ -1,0 +1,77 @@
+/* client/src/index.css */
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Source+Serif+4:wght@600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Manrope", "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  color: #1f2937;
+  background:
+    radial-gradient(320px circle at 72% 24%, rgba(161, 89, 54, 0.24), transparent 55%),
+    radial-gradient(circle at 16% 14%, rgba(255, 247, 240, 0.72), transparent 34%),
+    radial-gradient(circle at 84% 84%, rgba(201, 140, 88, 0.2), transparent 32%),
+    linear-gradient(135deg, #fbf2ea 0%, #f4e5d9 45%, #ecd8c7 100%);
+  min-height: 100vh;
+}
+
+h1, h2, h3 {
+  font-family: "Source Serif 4", Georgia, serif;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+@layer components {
+  .glass-app-surface {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .glass-sidebar {
+    background: linear-gradient(155deg, rgba(80, 10, 18, 0.86), rgba(58, 8, 18, 0.78));
+    backdrop-filter: blur(12px);
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 14px 36px rgba(46, 6, 11, 0.34);
+  }
+
+  .glass-topbar {
+    background: rgba(255, 255, 255, 0.46);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.44);
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  }
+
+  .glass-popover {
+    background: rgba(255, 255, 255, 0.66);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.52);
+    box-shadow: 0 20px 44px rgba(15, 23, 42, 0.18);
+  }
+
+  .bg-white.rounded-2xl,
+  .bg-white.rounded-xl,
+  .rounded-2xl.bg-white,
+  .rounded-xl.bg-white {
+    background: rgba(255, 255, 255, 0.52);
+    border-color: rgba(255, 255, 255, 0.52);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 12px 34px rgba(15, 23, 42, 0.12);
+  }
+
+  .shadow-sm {
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.1);
+  }
+
+  .shadow-md {
+    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.13);
+  }
+}
