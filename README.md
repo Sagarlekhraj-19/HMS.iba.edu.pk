@@ -1,5 +1,7 @@
 # HMS Portal — IBA Karachi
-**Hostel Management System** — Web-Based Application Development, Milestone 3
+**Hostel Management System** — Web-Based Application Development, Milestone 4
+
+HMS Portal is a hostel and mess management web application built to streamline room allocation, complaints, mess subscriptions, student records, and administrative workflows for IBA Karachi.
 
 ---
 
@@ -12,6 +14,16 @@
 | Database | PostgreSQL                        |
 | ORM      | Prisma                            |
 | Auth     | JWT (jsonwebtoken) + bcryptjs     |
+
+## Features
+
+- Student registration, login, logout, and role-based access control
+- Room application, allocation, review, and room management workflows
+- Mess order placement, cancellation, billing, and manager review flows
+- Complaint submission, assignment, resolution, and rejection tracking
+- Student feedback submission and history tracking
+- Admin dashboards, mess manager dashboards, and user access management
+- Responsive UI with toast-style status messages, confirmation dialogs, and realtime refreshes
 
 ---
 
@@ -102,6 +114,16 @@ npm run dev
 ```
 
 Frontend runs on: `http://localhost:5173`
+
+### 4. Seed data
+
+If your database is empty, run the Prisma seed script from the backend folder:
+
+```bash
+npm run db:seed
+```
+
+If your project uses a different seed command in `Backend/package.json`, use that script instead.
 
 ---
 
@@ -215,6 +237,14 @@ GET    /api/mess/admin/orders           All orders [JWT, ADMIN]
 PUT    /api/mess/admin/orders/:id/pay   Mark order as paid [JWT, ADMIN]
 ```
 
+### Team Contributions
+
+| Team Member | Responsibilities |
+|-------------|------------------|
+| Frontend Developer | Frontend pages, layout, styling, responsive behavior, and routing |
+| Backend Developer | Backend APIs, Prisma schema, authentication, validation, and business rules |
+| QA / Documentation | Testing, bug fixing, deployment checks, and README documentation |
+
 **POST /api/mess/order body:**
 ```json
 {
@@ -327,15 +357,4 @@ docs: update README                # documentation
   
   
   # Figma wireframes:
-
-  #Students role:
   https://www.figma.com/design/vhQavxqOXw0dNVJUJAAiCI/Untitled?node-id=0-1&t=eEUc7TVduyAgbTkO-1
-
-  #Admin role:
-  https://www.figma.com/design/4XqZI4wNrQZU3oIyx3OvVx/Admin_role?node-id=0-1&t=HM1tZSdNug4oAo3K-1
-
-
-
-  #All in one zip file:
-  https://drive.google.com/drive/folders/1FhwVcqFB-Kmmh7jWMeu4qnZyOYbuEcRu?usp=sharing
-  
