@@ -357,4 +357,12 @@ docs: update README                # documentation
   
   
   # Figma wireframes:
+  student role:
   https://www.figma.com/design/vhQavxqOXw0dNVJUJAAiCI/Untitled?node-id=0-1&t=eEUc7TVduyAgbTkO-1
+
+  Admin role:
+  https://www.figma.com/design/4XqZI4wNrQZU3oIyx3OvVx/Admin_role?node-id=0-1&t=t8X89fp0vNzG9yzD-1
+
+
+  Drive link:
+  https://drive.google.com/file/d/1kBQMp-fXwlaaOpPY3Ga7SSE-_0ia6O8l/view?usp=drive_link
